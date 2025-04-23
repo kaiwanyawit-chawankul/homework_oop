@@ -1,44 +1,36 @@
-name: .NET Core xUnit Tests
+name: Build and Test .NET Project with XUnit
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
-  test:
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
-    runs-on: windows-latest  # Use the latest Windows environment
-
-    env:
-      Solution_Name: your-solution-name                        # The solution name, e.g., MyProject.sln
-      Test_Project_Path: your-test-project-path                # The path to your xUnit test project, e.g., MyProject.Tests/MyProject.Tests.csproj
+  build:
+    runs-on: ubuntu-latest  # Runs on Linux (Ubuntu) environment, adjust if necessary
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Ensure all history is fetched so that tests are correctly discovered
+      # Checkout the code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Set up .NET SDK
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x  # Ensure the correct .NET version is installed
+      # Set up .NET SDK
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '9.0'  # Specify your .NET version here
 
-    # Restore dependencies for the test project
-    - name: Restore dependencies
-      run: dotnet restore $env:Test_Project_Path --configuration ${{ matrix.configuration }}
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
 
-    # Build the test project (optional, but ensures everything is built before testing)
-    - name: Build the project
-      run: dotnet build $env:Test_Project_Path --configuration ${{ matrix.configuration }}
+      # Build the project
+      - name: Build
+        run: dotnet build --configuration Release
 
-    # Run unit tests using xUnit
-    - name: Run unit tests
-      run: dotnet test $env:Test_Project_Path --configuration ${{ matrix.configuration }}
-
+      # Run unit tests with XUnit
+      - name: Run tests
+        run: dotnet test --configuration Release --logger "xunit"
