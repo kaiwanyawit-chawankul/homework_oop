@@ -5,6 +5,11 @@ namespace homework_oop;
 
 public class UnitTest2
 {
+    public class C
+    {
+        public List<A> Items {get;set;}
+    }
+
     public class A
     {
         public string Type { get; set; }
@@ -81,6 +86,27 @@ public class UnitTest2
         };
         // When
         var result = JsonConvert.DeserializeObject<List<A>>(json, settings);
+        // Then
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        Assert.Equal("A", result[0].Type);
+        Assert.Equal("B", result[1].Type);
+        Assert.Equal("Value", (result[1] as B).AdditionalProperty);
+    }
+
+        [Fact]
+    public void ConvertDerivedClassFromJsonClassCWithListInside()
+    {
+        // Given
+        string json = "{\"Items\":[{\"Type\":\"A\"},{\"Type\":\"B\",\"AdditionalProperty\":\"Value\"}]}";
+        var settings = new JsonSerializerSettings
+        {
+            TypeNameHandling = TypeNameHandling.Auto,
+            Converters = new List<JsonConverter> { new AConverter() }
+        };
+        // When
+        var actual = JsonConvert.DeserializeObject<C>(json, settings);
+        var result = actual.Items;
         // Then
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
